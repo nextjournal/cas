@@ -32,13 +32,17 @@
                              (flatten [(:exec-path config)
                                        (when content-type
                                          ["-h" (str "Content-Type:" content-type)])
-                                       "cp" file (str "gs://" target-path)]))
+                                       "cp"
+                                       "-n" ;; No-clobber, don't upload an existing file
+                                       file (str "gs://" target-path)]))
          result      @(process args
                                {:out :string
                                 :err :string})]
 
      (if (zero? (:exit result))
-       (str "https://storage.googleapis.com/" target-path)
+       {:url (str "https://storage.googleapis.com/" target-path)
+        :out (:out result)
+        :err (:err result)}
        (throw (ex-info "error uploading to CAS"
                        {:file   file
                         :args   args
