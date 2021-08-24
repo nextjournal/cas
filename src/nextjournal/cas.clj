@@ -13,6 +13,15 @@
     (multihash/base58 (digest/sha2-512 is))))
 
 (defn upload!
+  "Uploads a `file` content addressed to cloud storage
+
+  For supported options in config see `nextjournal.cas/config`
+
+  For now assumes `gsutil` as the exec, readilty set up and authenticated
+
+  If content-type is set, uses it as the Content-Type header. If it is not set,
+  let the underlying tooling figure out a content-type. This works for common like
+  jpeg, png, etc."
   ([config file]
    (upload! config file nil))
   ([config file content-type]
