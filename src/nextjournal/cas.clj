@@ -27,10 +27,11 @@
   ([config file content-type]
    (let [sha         (base58-sha file)
          target-path (str (:bucket config) "/data/" sha)
-         args        (flatten [(:exec-path config)
-                               (when content-type
-                                 ["-h" (str "Content-Type:" content-type)])
-                               "cp" file (str "gs://" target-path)])
+         args        (filter some?
+                             (flatten [(:exec-path config)
+                                       (when content-type
+                                         ["-h" (str "Content-Type:" content-type)])
+                                       "cp" file (str "gs://" target-path)]))
          result      @(process args
                                {:out :string})]
 
