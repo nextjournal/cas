@@ -2,7 +2,7 @@
 
 Library for storing content-addressed blobs to cloud buckets.
 
-It currently only supports uploading to Google Cloud Storage
+It currently only supports uploading to Google Cloud Storage.
 
 ## Setup
 

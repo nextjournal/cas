@@ -17,14 +17,15 @@
 
   For supported options in config see `nextjournal.cas/config`
 
-  For now assumes `gsutil` as the exec, readilty set up and authenticated
+  For now assumes `gsutil` as the exec, readily set up and authenticated
 
   If content-type is set, uses it as the Content-Type header. If it is not set,
-  let the underlying tooling figure out a content-type. This works for common like
-  jpeg, png, etc."
+  let the underlying tooling figure out a content-type. This works for common types
+  like jpeg, png, etc."
   ([config file]
    (upload! config file nil))
   ([config file content-type]
+   (assert (.exists (io/file file)) "File must exist")
    (let [sha         (base58-sha file)
          target-path (str (:bucket config) "/data/" sha)
          args        (filter some?
@@ -33,7 +34,8 @@
                                          ["-h" (str "Content-Type:" content-type)])
                                        "cp" file (str "gs://" target-path)]))
          result      @(process args
-                               {:out :string})]
+                               {:out :string
+                                :err :string})]
 
      (if (zero? (:exit result))
        (str "https://storage.googleapis.com/" target-path)
@@ -41,7 +43,8 @@
                        {:file   file
                         :args   args
                         :config config
-                        :sha    sha}))))))
+                        :sha    sha
+                        :err    (:err result)}))))))
 
 (comment
   (upload! config "examples/nextjournal.png")
