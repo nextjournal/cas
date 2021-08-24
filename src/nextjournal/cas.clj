@@ -6,7 +6,7 @@
 
 (def config
   {:bucket    "nextjournal-cas-eu"
-   :exec-path "/Users/kommen/bin/google-cloud-sdk/bin/gsutil"})
+   :exec-path "gsutil"})
 
 (defn base58-sha [file]
   (with-open [is (io/input-stream file)]
