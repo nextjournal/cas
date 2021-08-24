@@ -1,5 +1,7 @@
 (ns nextjournal.cas
+  (:gen-class)
   (:require [babashka.process :refer [process]]
+            [clojure.tools.cli :refer [parse-opts]]
             [clojure.java.io :as io]
             [multihash.core :as multihash]
             [multihash.digest :as digest]))
@@ -7,6 +9,7 @@
 (def config
   {:bucket    "nextjournal-cas-eu"
    :exec-path "gsutil"})
+
 
 (defn base58-sha [file]
   (with-open [is (io/input-stream file)]
@@ -55,3 +58,20 @@
   (upload! config "examples/foo.edn" "application/edn")
   (digest/sha2-512 (io/input-stream  "examples/nextjournal.png"))
   (base58-sha "examples/nextjournal.png"))
+
+
+(def cli-options
+  [["-c" "--content-type CONTENT_TYPE" "the Content-Type header to use for the uploaded file"]
+   ["-h" "--help"]])
+
+
+(defn -main [& args]
+  (let [opts (parse-opts args cli-options)]
+    (if (:help opts)
+      (println :summary opts)
+      (let [result (upload! config
+                            (first (:arguments opts))
+                            (:content-type (:options opts)))]
+        (println (:err result))
+        (println (:url result))
+        (shutdown-agents)))))
