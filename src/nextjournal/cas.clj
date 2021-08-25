@@ -3,12 +3,17 @@
   (:require [babashka.process :refer [process]]
             [clojure.tools.cli :refer [parse-opts]]
             [clojure.java.io :as io]
+            [clojure.edn :as edn]
             [multihash.core :as multihash]
             [multihash.digest :as digest]))
 
-(def config
-  {:bucket    "nextjournal-cas-eu"
-   :exec-path "gsutil"})
+(defn read-config
+  ([]
+   (read-config nil))
+  ([file]
+   (-> (or file (io/resource "nextjournal.edn"))
+       slurp
+       edn/read-string)))
 
 
 (defn base58-sha [file]
@@ -54,14 +59,15 @@
                         :err    (:err result)}))))))
 
 (comment
-  (upload! config "examples/nextjournal.png")
-  (upload! config "examples/foo.edn" "application/edn")
+  (upload! (read-config "nextjournal.edn") "examples/nextjournal.png")
+  (upload! (read-config "nextjournal.edn") "examples/foo.edn" "application/edn")
   (digest/sha2-512 (io/input-stream  "examples/nextjournal.png"))
   (base58-sha "examples/nextjournal.png"))
 
 
 (def cli-options
   [["-c" "--content-type CONTENT_TYPE" "the Content-Type header to use for the uploaded file"]
+   [nil "--config CONFIG" "the .edn configuration file to use (defaults to nextjournal.edn on the classpath)"]
    ["-h" "--help"]])
 
 
@@ -69,7 +75,8 @@
   (let [opts (parse-opts args cli-options)]
     (if (:help opts)
       (println :summary opts)
-      (let [result (upload! config
+      (let [config (read-config (:config (:options opts)))
+            result (upload! config
                             (first (:arguments opts))
                             (:content-type (:options opts)))]
         (println (:err result))

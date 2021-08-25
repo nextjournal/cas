@@ -1,0 +1,2 @@
+{:bucket    "nextjournal-cas-eu"
+ :exec-path "gsutil"}
