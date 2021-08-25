@@ -4,6 +4,7 @@
             [clojure.tools.cli :refer [parse-opts]]
             [clojure.java.io :as io]
             [clojure.edn :as edn]
+            [clojure.string :as str]
             [multihash.core :as multihash]
             [multihash.digest :as digest]))
 
@@ -30,33 +31,34 @@
   If content-type is set, uses it as the Content-Type header. If it is not set,
   let the underlying tooling figure out a content-type. This works for common types
   like jpeg, png, etc."
-  ([config file]
-   (upload! config file nil))
-  ([config file content-type]
-   (assert (.exists (io/file file)) "File must exist")
-   (let [sha         (base58-sha file)
-         target-path (str (:bucket config) "/data/" sha)
+  ([config src-file]
+   (upload! config src-file nil))
+  ([config src-file content-type]
+   (assert (.exists (io/file src-file)) "File must exist")
+   (let [sha         (base58-sha src-file)
+         target-file (str (:target-path config) sha)
          args        (filter some?
                              (flatten [(:exec-path config)
                                        (when content-type
                                          ["-h" (str "Content-Type:" content-type)])
                                        "cp"
                                        "-n" ;; No-clobber, don't upload an existing file
-                                       file (str "gs://" target-path)]))
+                                       src-file
+                                       target-file]))
          result      @(process args
                                {:out :string
                                 :err :string})]
 
      (if (zero? (:exit result))
-       {:url (str "https://storage.googleapis.com/" target-path)
+       {:url (str/replace-first target-file "gs://" "https://storage.googleapis.com/")
         :out (:out result)
         :err (:err result)}
        (throw (ex-info "error uploading to CAS"
-                       {:file   file
-                        :args   args
-                        :config config
-                        :sha    sha
-                        :err    (:err result)}))))))
+                       {:src-file src-file
+                        :args     args
+                        :config   config
+                        :sha      sha
+                        :err      (:err result)}))))))
 
 (comment
   (upload! (read-config "nextjournal.edn") "examples/nextjournal.png")

@@ -1,2 +1,2 @@
-{:bucket    "nextjournal-cas-eu"
- :exec-path "gsutil"}
+{:target-path "gs://nextjournal-cas-eu/data/"
+ :exec-path   "gsutil"}
