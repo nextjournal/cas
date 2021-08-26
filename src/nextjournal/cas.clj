@@ -21,6 +21,11 @@
   (with-open [is (io/input-stream file)]
     (multihash/base58 (digest/sha2-512 is))))
 
+(defn mime-type [{:as _config :keys [mime-types]} file]
+  (some-> (filter (fn [[k _]] (str/ends-with? file k)) mime-types)
+          first
+          val))
+
 (defn upload!
   "Uploads a `file` content addressed to cloud storage
 
@@ -37,6 +42,7 @@
    (assert (.exists (io/file src-file)) "File must exist")
    (let [sha         (base58-sha src-file)
          target-file (str (:target-path config) sha)
+         content-type (or content-type (mime-type config src-file))
          args        (filter some?
                              (flatten [(:exec-path config)
                                        (when content-type
@@ -62,7 +68,8 @@
 
 (comment
   (upload! (read-config "nextjournal.edn") "examples/nextjournal.png")
-  (upload! (read-config "nextjournal.edn") "examples/foo.edn" "application/edn")
+  (upload! (read-config "nextjournal.edn") "examples/foo.edn")
+  (upload! (read-config "nextjournal.edn") "examples/foo.edn" "application/something-else")
   (digest/sha2-512 (io/input-stream  "examples/nextjournal.png"))
   (base58-sha "examples/nextjournal.png"))
 
