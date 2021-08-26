@@ -12,7 +12,7 @@
   ([]
    (read-config nil))
   ([file]
-   (-> (or file (io/resource "nextjournal.edn"))
+   (-> (or file "nextjournal.edn")
        slurp
        edn/read-string)))
 
