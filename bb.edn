@@ -1,0 +1,5 @@
+{:min-bb-version "0.5.1"
+
+ :tasks
+ {upload {:doc "Upload a file to CAS"
+          :task (apply clojure "-M:upload" *command-line-args*)}}}

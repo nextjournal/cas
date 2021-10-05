@@ -1,0 +1,4 @@
+{:target-path "gs://nextjournal-cas-eu/data/"
+ :exec-path   "gsutil"
+ :mime-types  {".transit.json" "application/transit+json"
+               ".edn"          "application/edn"}}
