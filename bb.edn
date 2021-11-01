@@ -1,6 +1,6 @@
 {:min-bb-version "0.5.1"
  :deps {mvxcvi/multihash {:git/url "https://github.com/borkdude/clj-multihash"
-                          :git/sha "acd4890114b3792128b941280756deb761b8417f"}}
+                          :git/sha "df9a134b17a3f53efb34265098ee0ac1f2f01626"}}
  :paths ["src"]
  :tasks
  {upload {:doc "Upload a file to CAS"
