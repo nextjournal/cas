@@ -82,8 +82,9 @@
 
 (defn -main [& args]
   (let [opts (parse-opts args cli-options)]
-    (if (:help opts)
-      (println :summary opts)
+    (if (:help (:options opts))
+      (do (println "Summary:")
+          (println (:summary opts)))
       (let [config (read-config (:config (:options opts)))
             result (upload! config
                             (first (:arguments opts))
